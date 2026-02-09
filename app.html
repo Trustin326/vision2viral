@@ -183,6 +183,117 @@ try{
 let file = document.getElementById("imageInput").files[0]
 if(!file) return alert("Select image")
 
+let platform = document.getElementById("platformSelect")?.value || "tiktok"
+let niche = document.getElementById("nicheInput")?.value || ""
+let tone = document.getElementById("toneInput")?.value || "confident"
+
+let {data:{session}} = await supabase.auth.getSession()
+if(!session) return alert("Login expired")
+
+let token = session.access_token
+
+// Upload to storage
+let path = user.id + "/" + Date.now() + "_" + file.name
+
+let uploadRes = await supabase.storage
+.from("uploads")
+.upload(path,file)
+
+if(uploadRes.error){
+console.error(uploadRes.error)
+return alert("Upload failed")
+}
+
+// Insert upload row
+let {data:uploadRow,error:insertError} = await supabase
+.from("uploads")
+.insert({
+user_id:user.id,
+image_path:path
+})
+.select()
+.single()
+
+if(insertError){
+console.error(insertError)
+return alert("Database insert failed")
+}
+
+// Show loading state
+document.getElementById("results").innerHTML = `
+<h4>Generating Content...</h4>
+<p>Analyzing image and creating viral content...</p>
+`
+
+// Call API
+let res = await fetch("/api/generate",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+body:JSON.stringify({
+upload_id: uploadRow.id,
+platform,
+niche,
+tone
+})
+})
+
+let json = await res.json()
+
+if(!res.ok){
+console.error(json)
+document.getElementById("results").innerHTML = `
+<h4>Error</h4>
+<p>${json.error || "Generation failed"}</p>
+`
+return
+}
+
+let output = json.output
+
+// Render results
+document.getElementById("results").innerHTML = `
+<h4>🔥 Hooks</h4>
+${output.hooks.map(h=>`• ${h}`).join("<br>")}
+
+<h4>📝 Caption</h4>
+${output.caption}
+
+<h4>🏷 Hashtags</h4>
+${output.hashtags.join(" ")}
+
+<h4>🎬 Video Script</h4>
+<b>Hook:</b> ${output.video_script.hook}<br><br>
+<b>Scenes:</b><br>
+${output.video_script.scene_by_scene.map(s=>`• ${s}`).join("<br>")}<br><br>
+
+<b>Voiceover:</b><br>
+${output.video_script.voiceover}<br><br>
+
+<b>CTA:</b> ${output.video_script.cta}
+
+<h4>📹 Video Ideas</h4>
+${output.video_ideas.map(v=>`• ${v}`).join("<br>")}
+
+<br><br>
+<b>Credits Remaining:</b> ${json.credits_remaining}
+`
+
+}catch(err){
+console.error(err)
+alert("Unexpected error")
+}
+
+}
+
+
+try{
+
+let file = document.getElementById("imageInput").files[0]
+if(!file) return alert("Select image")
+
 let platform = document.getElementById("platformSelect").value
 let niche = document.getElementById("nicheInput").value
 let tone = document.getElementById("toneInput").value || "confident"
