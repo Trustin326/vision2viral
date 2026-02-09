@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vision2Viral Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+margin:0;
+font-family:Inter,system-ui;
+background:#02111a;
+color:white;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+padding:20px;
+background:#031e2e;
+}
+
+.btn{
+padding:10px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin:6px;
+font-weight:600;
+}
+
+.primary{background:#17ffd2;color:#001;}
+.gold{background:#ffd700;color:#000;}
+
+.box{
+background:#062033;
+padding:20px;
+border-radius:14px;
+margin:20px;
+}
+
+input, select{
+padding:10px;
+border-radius:8px;
+border:none;
+margin:6px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top">
+<h2>Vision2Viral Dashboard</h2>
+<button class="btn gold" onclick="logout()">Logout</button>
+</div>
+
+<!-- Upload Box -->
+<div class="box">
+<h3>Upload Image</h3>
+
+<input type="file" id="imageInput"><br>
+
+<select id="platformSelect">
+<option value="tiktok">TikTok</option>
+<option value="instagram">Instagram</option>
+<option value="youtube">YouTube Shorts</option>
+<option value="pinterest">Pinterest</option>
+</select>
+
+<input id="nicheInput" placeholder="Niche (Hair Stylist)">
+<input id="toneInput" placeholder="Tone (Luxury, Funny, Bold)">
+
+<br>
+<button class="btn primary" onclick="uploadImage()">Generate Content</button>
+</div>
+
+<!-- Results -->
+<div class="box">
+<h3>Results</h3>
+<div id="results"></div>
+</div>
+
+<!-- Affiliate -->
+<div class="box">
+<h3>Affiliate</h3>
+<button class="btn primary" onclick="createAffiliate()">Create Referral Code</button>
+<div id="affBox"></div>
+</div>
+
+<!-- Owner Admin -->
+<div class="box" id="ownerBox" style="display:none">
+<h3>Owner Admin</h3>
+
+<input id="adminSearchEmail" placeholder="Search user email">
+<button class="btn primary" onclick="adminSearch()">Search</button>
+
+<div id="adminResults"></div>
+</div>
+
+<script>
+
+/* =========================
+SUPABASE INIT
+========================= */
+
+const supabase = window.supabase.createClient(
+"YOUR_SUPABASE_URL",
+"YOUR_SUPABASE_ANON_KEY"
+)
+
+let user
+
+init()
+
+/* =========================
+INIT
+========================= */
+
+async function init(){
+
+let {data:{session}} = await supabase.auth.getSession()
+
+if(!session){
+let email = prompt("Email")
+let pass = prompt("Password")
+await supabase.auth.signInWithPassword({email,password:pass})
+location.reload()
+return
+}
+
+user = session.user
+
+await loadProfile()
+await recordReferralIfAny()
+await loadAffiliateIfExists()
+
+if(new URLSearchParams(window.location.search).get("paid")){
+alert("Payment successful — plan activated")
+}
+
+}
+
+/* =========================
+PROFILE LOAD
+========================= */
+
+async function loadProfile(){
+
+let {data} = await supabase
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.single()
+
+if(data.role === "owner"){
+document.getElementById("ownerBox").style.display="block"
+}
+
+}
+
+/* =========================
+UPLOAD + GENERATE
+========================= */
+
+async function uploadImage(){
+
+try{
+
+let file = document.getElementById("imageInput").files[0]
+if(!file) return alert("Select image")
+
+let platform = document.getElementById("platformSelect").value
+let niche = document.getElementById("nicheInput").value
+let tone = document.getElementById("toneInput").value || "confident"
+
+let {data:{session}} = await supabase.auth.getSession()
+let token = session.access_token
+
+let path = user.id + "/" + Date.now() + "_" + file.name
+
+let uploadRes = await supabase.storage.from("uploads").upload(path,file)
+
+if(uploadRes.error) return alert("Upload failed")
+
+let {data:uploadRow} = await supabase
+.from("uploads")
+.insert({
+user_id:user.id,
+image_path:path
+})
+.select()
+.single()
+
+document.getElementById("results").innerHTML = "Generating AI Content..."
+
+let res = await fetch("/api/generate",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+body:JSON.stringify({
+upload_id:uploadRow.id,
+platform,
+niche,
+tone
+})
+})
+
+let json = await res.json()
+
+if(!res.ok){
+document.getElementById("results").innerHTML = json.error
+return
+}
+
+let o = json.output
+
+document.getElementById("results").innerHTML = `
+<h4>Hooks</h4>
+${o.hooks.map(h=>"• "+h).join("<br>")}
+
+<h4>Caption</h4>
+${o.caption}
+
+<h4>Hashtags</h4>
+${o.hashtags.join(" ")}
+
+<h4>Video Script</h4>
+<b>Hook:</b> ${o.video_script.hook}<br>
+${o.video_script.scene_by_scene.map(s=>"• "+s).join("<br>")}
+
+<h4>Video Ideas</h4>
+${o.video_ideas.map(v=>"• "+v).join("<br>")}
+
+<br><br>
+Credits Remaining: ${json.credits_remaining}
+`
+
+}catch(e){
+console.error(e)
+alert("Error generating content")
+}
+
+}
+
+/* =========================
+AFFILIATE SYSTEM
+========================= */
+
+function makeCode(email){
+return email.split("@")[0].replace(/[^a-z0-9]/gi,"").slice(0,8)
++ Math.random().toString(36).slice(2,6)
+}
+
+async function createAffiliate(){
+
+let {data:{session}} = await supabase.auth.getSession()
+let code = makeCode(session.user.email)
+
+let {data,error} = await supabase
+.from("affiliates")
+.insert({
+user_id:session.user.id,
+referral_code:code
+})
+.select()
+.single()
+
+if(error){
+alert("Already exists or error")
+return
+}
+
+renderAffiliate(data)
+
+}
+
+function renderAffiliate(aff){
+let link = location.origin + "/web/index.html?ref=" + aff.referral_code
+
+document.getElementById("affBox").innerHTML = `
+Code: ${aff.referral_code}<br>
+Link: <a href="${link}" target="_blank">${link}</a>
+`
+}
+
+async function loadAffiliateIfExists(){
+let {data} = await supabase
+.from("affiliates")
+.select("*")
+.eq("user_id",user.id)
+.maybeSingle()
+
+if(data) renderAffiliate(data)
+}
+
+async function recordReferralIfAny(){
+
+let ref = localStorage.getItem("affiliate_ref")
+if(!ref) return
+
+await supabase.from("affiliate_referrals").insert({
+affiliate_code:ref,
+referred_user:user.id
+})
+
+localStorage.removeItem("affiliate_ref")
+
+}
+
+/* =========================
+OWNER ADMIN
+========================= */
+
+async function adminSearch(){
+
+let email = document.getElementById("adminSearchEmail").value
+
+let {data:{session}} = await supabase.auth.getSession()
+let token = session.access_token
+
+let res = await fetch("/api/admin-user-search",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+body:JSON.stringify({email})
+})
+
+let json = await res.json()
+
+document.getElementById("adminResults").innerHTML =
+(json.results||[]).map(u=>`
+<div style="border:1px solid #0aa;padding:10px;margin:10px;border-radius:10px">
+<b>${u.email}</b><br>
+Plan: ${u.plan} | Credits: ${u.credits_remaining}<br>
+<button onclick="adminSetPlan('${u.id}','starter')">Starter</button>
+<button onclick="adminSetPlan('${u.id}','creator')">Creator</button>
+<button onclick="adminSetPlan('${u.id}','agency')">Agency</button>
+<button onclick="adminCredits('${u.id}',${u.credits_remaining})">Set Credits</button>
+</div>
+`).join("")
+}
+
+async function adminSetPlan(id,plan){
+
+let {data:{session}} = await supabase.auth.getSession()
+let token = session.access_token
+
+await fetch("/api/admin-user-update",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+body:JSON.stringify({user_id:id,plan})
+})
+
+alert("Plan Updated")
+adminSearch()
+
+}
+
+async function adminCredits(id,current){
+
+let val = prompt("Credits:",current)
+if(!val) return
+
+let {data:{session}} = await supabase.auth.getSession()
+let token = session.access_token
+
+await fetch("/api/admin-user-update",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+body:JSON.stringify({
+user_id:id,
+credits_remaining:Number(val)
+})
+})
+
+alert("Credits Updated")
+adminSearch()
+
+}
+
+/* =========================
+LOGOUT
+========================= */
+
+async function logout(){
+await supabase.auth.signOut()
+location.reload()
+}
+
+</script>
+
+</body>
+</html>
