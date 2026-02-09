@@ -468,6 +468,38 @@ Plan: ${u.plan} | Credits: ${u.credits_remaining}<br>
 </div>
 `).join("")
 }
+async function searchUser(email){
+
+let {data,error} = await supabase
+.from("profiles")
+.select("*")
+.eq("email",email)
+
+console.log(data)
+
+}
+
+async function addCredits(userId,credits){
+
+await supabase
+.from("profiles")
+.update({
+credits_remaining: credits
+})
+.eq("id",userId)
+
+}
+
+async function changePlan(userId,plan){
+
+await supabase
+.from("profiles")
+.update({
+plan
+})
+.eq("id",userId)
+
+}
 
 async function adminSetPlan(id,plan){
 
