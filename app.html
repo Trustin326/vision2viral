@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vision2Viral Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+margin:0;
+font-family:Inter;
+background:#02111a;
+color:white;
+}
+.top{
+display:flex;
+justify-content:space-between;
+padding:20px;
+background:#031e2e;
+}
+.btn{
+padding:10px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin:6px;
+}
+.primary{background:#17ffd2;color:#001;}
+.gold{background:#ffd700;color:#000;}
+.box{
+background:#062033;
+padding:20px;
+border-radius:14px;
+margin:20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top">
+<h2>Vision2Viral Dashboard</h2>
+<button class="btn gold" onclick="logout()">Logout</button>
+</div>
+
+<div class="box">
+<h3>Upload Image</h3>
+<input type="file" id="imageInput">
+<br>
+<button class="btn primary" onclick="uploadImage()">Upload</button>
+</div>
+
+<div class="box">
+<h3>Results</h3>
+<div id="results"></div>
+</div>
+
+<div class="box" id="ownerBox" style="display:none">
+<h3>Owner Analytics</h3>
+<div id="ownerData"></div>
+</div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"YOUR_SUPABASE_URL",
+"YOUR_SUPABASE_ANON_KEY"
+)
+
+let user
+
+init()
+
+async function init(){
+
+let {data:{session}} = await supabase.auth.getSession()
+
+if(!session){
+let email = prompt("Email")
+let pass = prompt("Password")
+await supabase.auth.signInWithPassword({email,password:pass})
+location.reload()
+}
+
+user = session.user
+loadProfile()
+}
+
+async function loadProfile(){
+
+let {data} = await supabase
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.single()
+
+if(data.role === "owner"){
+document.getElementById("ownerBox").style.display="block"
+loadOwnerMetrics()
+}
+
+}
+
+async function uploadImage(){
+
+let file = document.getElementById("imageInput").files[0]
+
+if(!file) return alert("Select image")
+
+let path = user.id + "/" + Date.now() + "_" + file.name
+
+await supabase.storage.from("uploads").upload(path,file)
+
+let {data:uploadRow} = await supabase.from("uploads").insert({
+user_id:user.id,
+image_path:path
+}).select().single()
+
+// DEMO results for now
+document.getElementById("results").innerHTML = `
+<h4>Hooks</h4>
+• Stop scrolling if you want better results
+• This changed everything for me
+
+<h4>Caption</h4>
+Consistency beats motivation every time.
+
+<h4>Tags</h4>
+#growth #viralcontent #creatorai
+
+<h4>Video Script</h4>
+Hook → Show product → Explain benefit → CTA
+
+<h4>Video Ideas</h4>
+1. Before vs After
+2. POV transformation
+3. Storytime results
+`
+
+}
+
+async function loadOwnerMetrics(){
+
+let {data} = await supabase
+.from("owner_metrics")
+.select("*")
+.single()
+
+document.getElementById("ownerData").innerHTML = `
+Users: ${data.total_users}<br>
+Generations: ${data.total_generations}<br>
+Active Subs: ${data.active_subscribers}
+`
+
+}
+
+async function logout(){
+await supabase.auth.signOut()
+location.reload()
+}
+
+</script>
+
+</body>
+</html>
