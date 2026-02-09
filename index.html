@@ -87,7 +87,21 @@ box-shadow:
 inset 0 0 40px rgba(255,255,255,0.05);
 }
 
-</style>
+</style>.hero::before{
+content:"";
+position:absolute;
+inset:0;
+background:
+radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
+background-size:35px 35px;
+opacity:.15;
+animation:twinkle 20s linear infinite;
+}
+
+@keyframes twinkle{
+from{ transform:translateY(0); }
+to{ transform:translateY(-200px); }
+}
 <head<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
