@@ -1,192 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Vision2Viral AI</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-</* MOCKUP SECTION */
-
-.mockupSection{
-padding:100px 8%;
-display:grid;
-grid-template-columns:1.2fr 1fr;
-gap:60px;
-align-items:center;
-}
-
-/* FLOAT ANIMATION */
-@keyframes floatSlow{
-0%{ transform:translateY(0px); }
-50%{ transform:translateY(-20px); }
-100%{ transform:translateY(0px); }
-}
-
-@keyframes floatFast{
-0%{ transform:translateY(0px); }
-50%{ transform:translateY(-12px); }
-100%{ transform:translateY(0px); }
-}
-
-/* DASHBOARD MOCKUP */
-.dashboardMock{
-width:100%;
-border-radius:20px;
-box-shadow:0 40px 80px rgba(0,0,0,0.15);
-animation:floatSlow 8s ease-in-out infinite;
-}
-
-/* PHONE MOCKUP */
-.phoneMock{
-width:280px;
-border-radius:30px;
-box-shadow:0 30px 60px rgba(0,0,0,0.2);
-animation:floatFast 6s ease-in-out infinite;
-}
-
-/* MOCKUP TEXT SIDE */
-.mockupText h2{
-font-family:'Playfair Display';
-font-size:48px;
-margin-bottom:20px;
-}
-
-.mockupText p{
-font-size:20px;
-opacity:.75;
-margin-bottom:25px;
-}
->
-
-/* BASE */
+<style>
 body{
 margin:0;
-font-family:'Inter', system-ui;
-background:linear-gradient(180deg,#ffffff,#f4f8fb);
+font-family:Inter;
+background:linear-gradient(180deg,#ffffff,#f5f8fb);
 color:#0a2540;
 }
 
-/* NAV */
 .nav{
 display:flex;
 justify-content:space-between;
-align-items:center;
 padding:20px 8%;
 background:white;
-box-shadow:0 4px 20px rgba(0,0,0,0.05);
-position:sticky;
-top:0;
+box-shadow:0 2px 20px rgba(0,0,0,.05);
 }
 
 .logo{
-font-family:'Playfair Display';
-font-size:28px;
-color:#0a2540;
+font-family:Playfair Display;
+font-size:26px;
 }
 
-/* HERO */
 .hero{
-padding:120px 8% 80px;
+padding:120px 8%;
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:60px;
 align-items:center;
 }
 
-.heroTitle{
-font-family:'Playfair Display';
-font-size:64px;
-line-height:1.1;
-margin-bottom:20px;
+.hero h1{
+font-family:Playfair Display;
+font-size:60px;
 }
 
-.heroAccent{
-color:#0fb9b1;
-}
+.accent{ color:#0fb9b1; }
 
-.heroSub{
-font-size:20px;
-opacity:.8;
-margin-bottom:35px;
-}
-
-/* BUTTONS */
-.btnPrimary{
-padding:16px 28px;
+.btn{
+padding:15px 26px;
 border-radius:12px;
 border:none;
 font-weight:600;
+cursor:pointer;
+}
+
+.primary{
 background:#0fb9b1;
 color:white;
-cursor:pointer;
-font-size:16px;
-box-shadow:0 6px 20px rgba(15,185,177,0.25);
+box-shadow:0 10px 30px rgba(15,185,177,.25);
 }
 
-.btnSecondary{
-padding:16px 28px;
-border-radius:12px;
+.secondary{
+background:white;
 border:2px solid #0fb9b1;
-background:white;
 color:#0fb9b1;
-font-weight:600;
-cursor:pointer;
-margin-left:15px;
+margin-left:10px;
 }
 
-/* HERO CARD */
-.heroCard{
-background:white;
-padding:40px;
-border-radius:20px;
-box-shadow:0 20px 60px rgba(0,0,0,0.08);
-}
-
-/* TRUST */
-.trust{
-padding:60px 8%;
-text-align:center;
-}
-
-.trustRow{
-display:flex;
-justify-content:center;
-gap:40px;
-margin-top:30px;
-opacity:.6;
-}
-
-/* DEMO */
-.demo{
+/* MOCKUP */
+.mockupSection{
 padding:80px 8%;
-background:#f7fbfc;
-text-align:center;
+display:grid;
+grid-template-columns:1.2fr 1fr;
+gap:60px;
+align-items:center;
 }
 
-.demoBox{
-background:white;
-padding:50px;
-border-radius:20px;
-max-width:700px;
-margin:auto;
-box-shadow:0 15px 50px rgba(0,0,0,0.08);
+.dashboardMock{
+width:100%;
+border-radius:18px;
+box-shadow:0 30px 60px rgba(0,0,0,.15);
+animation:float 8s ease-in-out infinite;
 }
 
-input{
-padding:14px;
-border-radius:12px;
-border:1px solid #dde6ed;
-margin:10px;
+.phoneMock{
 width:260px;
+position:absolute;
+right:-40px;
+bottom:-40px;
+border-radius:30px;
+box-shadow:0 20px 40px rgba(0,0,0,.2);
+animation:float 6s ease-in-out infinite;
 }
 
-/* PRICING */
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(-15px)}
+100%{transform:translateY(0)}
+}
+
 .pricing{
-padding:100px 8%;
+padding:80px 8%;
 text-align:center;
 }
 
@@ -194,40 +106,15 @@ text-align:center;
 display:flex;
 justify-content:center;
 gap:30px;
-margin-top:40px;
 flex-wrap:wrap;
 }
 
 .priceCard{
 background:white;
-padding:45px;
+padding:40px;
 border-radius:20px;
-width:280px;
-box-shadow:0 15px 50px rgba(0,0,0,0.08);
-}
-
-.priceHighlight{
-border:2px solid #0fb9b1;
-transform:scale(1.05);
-}
-
-.price{
-font-size:42px;
-font-weight:700;
-margin:20px 0;
-}
-
-/* CTA */
-.cta{
-padding:100px 8%;
-text-align:center;
-background:linear-gradient(135deg,#0fb9b1,#0a7f7a);
-color:white;
-}
-
-.cta h2{
-font-family:'Playfair Display';
-font-size:48px;
+width:260px;
+box-shadow:0 20px 50px rgba(0,0,0,.08);
 }
 
 footer{
@@ -235,176 +122,57 @@ padding:40px;
 text-align:center;
 opacity:.6;
 }
-
 </style>
-
 </head>
 
 <body>
 
-<!-- NAV -->
 <div class="nav">
 <div class="logo">Vision2Viral</div>
-<button class="btnPrimary">Login</button>
+<a href="/web/app.html"><button class="btn primary">Login</button></a>
 </div>
 
-<!-- HERO -->
 <section class="hero">
+<div>
+<h1>Turn Photos Into <span class="accent">Viral Content</span></h1>
+<p>Generate hooks, captions, scripts and video ideas instantly using AI.</p>
+<a href="/web/app.html"><button class="btn primary">Start Free</button></a>
+</div>
 
 <div>
-<h1 class="heroTitle">
-Turn Photos Into <span class="heroAccent">Viral Content</span>
-</h1>
+<img class="dashboardMock"
+src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1400">
 
-<p class="heroSub">
-Generate hooks, captions, scripts, hashtags and video ideas from a single image using AI.
-</p>
-
-<button class="btnPrimary">Start Free Trial</button>
-<button class="btnSecondary">Watch Demo</button>
-</div>
-
-<div class="heroCard">
-<h3>Why Creators Use Vision2Viral</h3>
-<p>✔ Faster content creation</p>
-<p>✔ Higher engagement posts</p>
-<p>✔ Platform optimized AI output</p>
-<p>✔ Agency scale automation</p>
-</div>
-
-</section>
-<!-- PRODUCT MOCKUP SECTION -->
-<section class="mockupSection">
-
-<div class="mockupText">
-
-<h2>
-See Your Content Engine In Action
-</h2>
-
-<p>
-Upload one photo. Instantly generate viral hooks, captions, scripts and post ideas ready to publish.
-</p>
-
-<button class="btnPrimary">
-Start Free Trial
-</button>
-
-</div>
-
-<div style="position:relative;">
-
-<!-- DASHBOARD MOCKUP -->
-<img
-class="dashboardMock"
-src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1400"
-alt="Dashboard Mockup"
-/>
-
-<!-- PHONE MOCKUP -->
-<img
-class="phoneMock"
-style="position:absolute; right:-40px; bottom:-40px;"
-src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=800"
-alt="Mobile Mockup"
-/>
-
-</div>
-
-</section>
-
-<!-- TRUST -->
-<section class="trust">
-<h3>Built For Modern Creators & Agencies</h3>
-<div class="trustRow">
-<span>AI Powered</span>
-<span>Secure</span>
-<span>Cloud Based</span>
-<span>Instant Results</span>
+<img class="phoneMock"
+src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=800">
 </div>
 </section>
 
-<!-- DEMO -->
-<section class="demo">
-<h2>Try The Demo</h2>
-
-<div class="demoBox">
-
-<input type="file">
-
-<br>
-
-<button class="btnPrimary" onclick="runDemo()">
-Generate Demo Content
-</button>
-
-<div id="demoOutput"></div>
-
-</div>
-</section>
-
-<!-- PRICING -->
 <section class="pricing">
-
 <h2>Simple Pricing</h2>
 
 <div class="priceGrid">
-
 <div class="priceCard">
 <h3>Starter</h3>
-<div class="price">$19</div>
+<h2>$19</h2>
 <p>200 Generations</p>
-<button class="btnPrimary">Start</button>
 </div>
 
-<div class="priceCard priceHighlight">
+<div class="priceCard">
 <h3>Creator</h3>
-<div class="price">$39</div>
+<h2>$39</h2>
 <p>1000 Generations</p>
-<button class="btnPrimary">Start</button>
 </div>
 
 <div class="priceCard">
 <h3>Agency</h3>
-<div class="price">$79</div>
+<h2>$79</h2>
 <p>Unlimited</p>
-<button class="btnPrimary">Start</button>
 </div>
-
 </div>
-
 </section>
 
-<!-- CTA -->
-<section class="cta">
-<h2>Start Creating Viral Content Today</h2>
-<p>No contracts. Cancel anytime.</p>
-<button class="btnPrimary" style="background:white;color:#0fb9b1;">
-Start Free Trial
-</button>
-</section>
-
-<footer>
-© Vision2Viral AI
-</footer>
-
-<script>
-
-function runDemo(){
-document.getElementById("demoOutput").innerHTML = `
-<h4>Hooks</h4>
-• This changed my content strategy forever<br>
-• Stop posting without this AI tool<br>
-
-<h4>Caption</h4>
-If you want higher engagement, start with better content systems.
-
-<h4>Hashtags</h4>
-#viralcontent #creatortools #aicontent
-`
-}
-
-</script>
+<footer>© Vision2Viral AI</footer>
 
 </body>
 </html>
