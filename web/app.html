@@ -1,0 +1,22 @@
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"https://hkahomqynwgwdsgvqejr.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrYWhvbXF5bndnd2RzZ3ZxZWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NDc4MDMsImV4cCI6MjA4NjMyMzgwM30.A5WookIa6Vn1b1BDvgGtDvhXBqXP-18Kcp0KY9-T9nk"
+)
+
+async function checkSession(){
+
+let { data:{ session } } = await supabase.auth.getSession()
+
+if(!session){
+location.href = "../login.html"
+}
+
+}
+
+checkSession()
+
+</script>
