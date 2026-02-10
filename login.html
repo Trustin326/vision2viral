@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login - Vision2Viral</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+font-family:Inter;
+background:linear-gradient(135deg,#0fb9b1,#0a7f7a);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+.card{
+background:white;
+padding:50px;
+border-radius:20px;
+width:380px;
+box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+input{
+width:100%;
+padding:14px;
+margin:10px 0;
+border-radius:10px;
+border:1px solid #ddd;
+}
+button{
+width:100%;
+padding:14px;
+background:#0fb9b1;
+border:none;
+color:white;
+border-radius:10px;
+font-weight:600;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<h2>Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="pass" placeholder="Password" type="password">
+
+<button onclick="login()">Login</button>
+</div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"https://hkahomqynwgwdsgvqejr.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrYWhvbXF5bndnd2RzZ3ZxZWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NDc4MDMsImV4cCI6MjA4NjMyMzgwM30.A5WookIa6Vn1b1BDvgGtDvhXBqXP-18Kcp0KY9-T9nk"
+)
+
+async function login(){
+
+let email = document.getElementById("email").value
+let pass = document.getElementById("pass").value
+
+let { error } = await supabase.auth.signInWithPassword({
+email,
+password:pass
+})
+
+if(error) return alert(error.message)
+
+/* Ensure session saved */
+await supabase.auth.getSession()
+
+/* GitHub Pages safe redirect */
+location.href = "./web/app.html"
+
+}
+
+</script>
+
+</body>
+</html>
