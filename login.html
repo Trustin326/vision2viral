@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login • Vision2Viral</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f4f7fb; --card:#fff; --text:#0a2540; --muted:#5b6b7b;
+      --brand:#0fb9b1; --brand2:#0a7f7a; --border:#e6edf5;
+      --shadow:0 20px 60px rgba(10,37,64,.10);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter,system-ui; color:var(--text);
+      background: radial-gradient(800px 400px at 20% 10%, rgba(15,185,177,.18), transparent 55%),
+                  radial-gradient(700px 400px at 85% 15%, rgba(10,127,122,.14), transparent 55%),
+                  linear-gradient(180deg,#ffffff,var(--bg));
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding:28px;
+    }
+    .shell{width:min(980px,100%); display:grid; grid-template-columns: 1.1fr .9fr; gap:22px;}
+    .panel{
+      border:1px solid var(--border); background:var(--card); border-radius:var(--radius);
+      box-shadow:var(--shadow); overflow:hidden;
+    }
+    .left{
+      padding:34px;
+      background:
+        radial-gradient(600px 260px at 20% 0%, rgba(15,185,177,.25), transparent 55%),
+        linear-gradient(135deg, rgba(15,185,177,.10), rgba(10,127,122,.08)),
+        #fff;
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;}
+    .dot{width:14px; height:14px; border-radius:6px; background:linear-gradient(135deg,var(--brand),var(--brand2))}
+    h1{margin:14px 0 6px; font-size:34px; line-height:1.1}
+    .sub{color:var(--muted); margin:0 0 18px}
+    .bullets{margin:18px 0 0; padding:0; list-style:none; display:grid; gap:10px}
+    .bullets li{display:flex; gap:10px; color:var(--muted)}
+    .check{
+      width:20px; height:20px; border-radius:7px;
+      background:rgba(15,185,177,.14); display:grid; place-items:center;
+      color:var(--brand); font-weight:800;
+    }
+
+    .right{padding:26px 26px 22px;}
+    .tabs{display:flex; gap:8px; background:#f6f9fd; border:1px solid var(--border); border-radius:14px; padding:6px;}
+    .tab{
+      flex:1; border:0; padding:10px 12px; border-radius:12px;
+      background:transparent; cursor:pointer; font-weight:700; color:var(--muted);
+    }
+    .tab.active{background:#fff; color:var(--text); box-shadow:0 6px 16px rgba(10,37,64,.08)}
+    .form{margin-top:16px}
+    label{display:block; font-size:12px; font-weight:700; color:var(--muted); margin:12px 0 6px}
+    input{
+      width:100%; padding:12px 12px; border-radius:12px; border:1px solid var(--border);
+      outline:none; font-size:14px;
+    }
+    input:focus{border-color:rgba(15,185,177,.55); box-shadow:0 0 0 4px rgba(15,185,177,.12)}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .btn{
+      width:100%; margin-top:14px; padding:12px 14px; border:0; border-radius:12px;
+      background:linear-gradient(90deg,var(--brand),var(--brand2));
+      color:#fff; font-weight:800; cursor:pointer; font-size:14px;
+      box-shadow:0 12px 30px rgba(15,185,177,.22);
+    }
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .linkRow{display:flex; justify-content:space-between; gap:10px; margin-top:12px; font-size:13px}
+    a{color:var(--brand2); text-decoration:none; font-weight:700}
+    .msg{
+      margin-top:12px; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+      background:#fbfdff; color:var(--muted); font-size:13px;
+    }
+    .err{border-color:#ffd2d2; background:#fff6f6; color:#8b2b2b}
+    .ok{border-color:#cdeeea; background:#f3fffd; color:#0a5a54}
+    .mini{margin-top:14px; color:var(--muted); font-size:12px}
+    @media (max-width: 900px){
+      .shell{grid-template-columns:1fr}
+      .left{display:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="panel left">
+      <div class="brand"><span class="dot"></span> Vision2Viral</div>
+      <h1>Turn photos into viral content.</h1>
+      <p class="sub">Login to generate hooks, captions, hashtags, scripts, bulk packs, and content calendars.</p>
+
+      <ul class="bullets">
+        <li><span class="check">✓</span> Platform-optimized outputs (TikTok / IG / Shorts / Pinterest)</li>
+        <li><span class="check">✓</span> Bulk generation for agencies</li>
+        <li><span class="check">✓</span> Brand voice + content calendar</li>
+        <li><span class="check">✓</span> Affiliate + org/team tools</li>
+      </ul>
+    </div>
+
+    <div class="panel right">
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" onclick="switchMode('login')">Login</button>
+        <button class="tab" id="tabSignup" onclick="switchMode('signup')">Sign up</button>
+        <button class="tab" id="tabForgot" onclick="switchMode('forgot')">Forgot</button>
+      </div>
+
+      <div class="form" id="formArea">
+        <!-- forms injected by JS -->
+      </div>
+
+      <div class="mini">
+        Tip: Make sure your Supabase <b>Project URL</b> + <b>anon public key</b> are correct in this file.
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ✅ IMPORTANT: set these correctly
+  const SUPABASE_URL = "https://hkahomqynwgwdsgvqejr.supabase.co";         // e.g. https://xxxx.supabase.co
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrYWhvbXF5bndnd2RzZ3ZxZWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NDc4MDMsImV4cCI6MjA4NjMyMzgwM30.A5WookIa6Vn1b1BDvgGtDvhXBqXP-18Kcp0KY9-T9nk";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const state = { mode: "login", busy: false };
+
+  function setBusy(b){
+    state.busy = b;
+    document.querySelectorAll("button, input").forEach(el=>{
+      if(el.classList.contains("tab")) return;
+      el.disabled = b;
+    });
+  }
+
+  function msg(html, type=""){
+    const el = document.getElementById("msgBox");
+    if(!el) return;
+    el.className = "msg " + (type || "");
+    el.innerHTML = html;
+  }
+
+  function switchMode(mode){
+    state.mode = mode;
+    document.getElementById("tabLogin").classList.toggle("active", mode==="login");
+    document.getElementById("tabSignup").classList.toggle("active", mode==="signup");
+    document.getElementById("tabForgot").classList.toggle("active", mode==="forgot");
+    render();
+  }
+
+  function render(){
+    const area = document.getElementById("formArea");
+
+    if(state.mode === "login"){
+      area.innerHTML = `
+.        <h2 style="margin:6px 0 8px;">Welcome back</h2>
+        <div class="msg" id="msgBox">Login with your email and password.</div>
+
+        <label>Email</label>
+        <input id="email" type="email" placeholder="you@domain.com" autocomplete="email">
+
+        <label>Password</label>
+        <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password">
+
+        <button class="btn" onclick="doLogin()">Login</button>
+
+        <div class="linkRow">
+          <a href="#" onclick="switchMode('forgot'); return false;">Forgot password?</a>
+          <a href="#" onclick="switchMode('signup'); return false;">Create account</a>
+        </div>
+      `;
+      return;
+    }
+
+    if(state.mode === "signup"){
+      area.innerHTML = `
+        <h2 style="margin:6px 0 8px;">Create your account</h2>
+        <div class="msg" id="msgBox">We’ll send a confirmation email if enabled in Supabase.</div>
+
+        <label>Email</label>
+        <input id="email" type="email" placeholder="you@domain.com" autocomplete="email">
+
+        <div class="row">
+          <div>
+            <label>Password</label>
+            <input id="pass" type="password" placeholder="Create password" autocomplete="new-password">
+          </div>
+          <div>
+            <label>Confirm</label>
+            <input id="pass2" type="password" placeholder="Confirm" autocomplete="new-password">
+          </div>
+        </div>
+
+        <button class="btn" onclick="doSignup()">Sign up</button>
+
+        <div class="linkRow">
+          <a href="#" onclick="switchMode('login'); return false;">Login instead</a>
+          <span></span>
+        </div>
+      `;
+      return;
+    }
+
+    if(state.mode === "forgot"){
+      area.innerHTML = `
+        <h2 style="margin:6px 0 8px;">Reset your password</h2>
+        <div class="msg" id="msgBox">Enter your email and we’ll send a reset link.</div>
+
+        <label>Email</label>
+        <input id="email" type="email" placeholder="you@domain.com" autocomplete="email">
+
+        <button class="btn" onclick="doForgot()">Send reset link</button>
+
+        <div class="linkRow">
+          <a href="#" onclick="switchMode('login'); return false;">Back to login</a>
+          <span></span>
+        </div>
+      `;
+      return;
+    }
+  }
+
+  async function doLogin(){
+    try{
+      setBusy(true);
+      msg("Signing you in…");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("pass").value;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if(error) return msg(error.message, "err");
+
+      // ensure session persisted
+      await supabase.auth.getSession();
+
+      // GitHub Pages-safe redirect
+      window.location.href = "./web/app.html";
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doSignup(){
+    try{
+      setBusy(true);
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("pass").value;
+      const pass2 = document.getElementById("pass2").value;
+
+      if(pass.length < 6) return msg("Password must be at least 6 characters.", "err");
+      if(pass !== pass2) return msg("Passwords do not match.", "err");
+
+      msg("Creating your account…");
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          // important for GitHub Pages password reset + confirmations
+          emailRedirectTo: window.location.origin + "/vision2viral/web/app.html"
+        }
+      });
+
+      if(error) return msg(error.message, "err");
+
+      msg("Account created. If email confirmation is enabled, check your inbox.", "ok");
+      // Optional: auto switch to login
+      setTimeout(()=>switchMode("login"), 900);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doForgot(){
+    try{
+      setBusy(true);
+      const email = document.getElementById("email").value.trim();
+      msg("Sending reset email…");
+
+      // This must be in Supabase Auth Redirect URLs too
+      const redirectTo = window.location.origin + "/vision2viral/reset.html";
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      if(error) return msg(error.message, "err");
+
+      msg("Reset link sent. Check your email.", "ok");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // if already logged in, go to dashboard
+  (async function(){
+    render();
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(session) window.location.href = "./web/app.html";
+  })();
+</script>
+</body>
+</html>
