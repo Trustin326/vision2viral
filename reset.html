@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reset Password • Vision2Viral</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--text:#0a2540;--muted:#5b6b7b;--brand:#0fb9b1;--border:#e6edf5;--shadow:0 20px 60px rgba(10,37,64,.10);--radius:18px;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui;background:linear-gradient(180deg,#fff,var(--bg));min-height:100vh;display:grid;place-items:center;padding:28px;color:var(--text);}
+    .card{width:min(520px,100%);background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;}
+    h1{margin:6px 0 8px}
+    p{margin:0 0 18px;color:var(--muted)}
+    label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 6px}
+    input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border)}
+    .btn{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:linear-gradient(90deg,#0fb9b1,#0a7f7a);color:#fff;font-weight:800;cursor:pointer}
+    .msg{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fbfdff;color:var(--muted);font-size:13px}
+    .err{border-color:#ffd2d2;background:#fff6f6;color:#8b2b2b}
+    .ok{border-color:#cdeeea;background:#f3fffd;color:#0a5a54}
+    a{color:#0a7f7a;font-weight:800;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Set a new password</h1>
+    <p>If you opened this page from a reset email, you can set your new password here.</p>
+
+    <div id="state" class="msg">Loading…</div>
+
+    <div id="form" style="display:none">
+      <label>New password</label>
+      <input id="p1" type="password" placeholder="New password">
+
+      <label>Confirm password</label>
+      <input id="p2" type="password" placeholder="Confirm password">
+
+      <button class="btn" onclick="updatePass()">Update password</button>
+      <div class="msg" style="margin-top:12px">After updating, you’ll be sent back to login.</div>
+    </div>
+
+    <div style="margin-top:14px">
+      <a href="./login.html">Back to login</a>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = "YOUR_SUPABASE_URL";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const stateEl = document.getElementById("state");
+  const formEl = document.getElementById("form");
+
+  function setState(text, type=""){
+    stateEl.className = "msg " + (type || "");
+    stateEl.textContent = text;
+  }
+
+  // Supabase v2 password recovery flow:
+  // When user clicks email link, Supabase can set a session in the URL hash.
+  // We should call getSession() to hydrate, then show form.
+  (async function init(){
+    const { data:{ session }, error } = await supabase.auth.getSession();
+    if(error){
+      setState(error.message, "err");
+      return;
+    }
+    if(!session){
+      setState("No active recovery session found. Please use the link from your reset email again.", "err");
+      return;
+    }
+    setState("Recovery session detected. Enter a new password below.", "ok");
+    formEl.style.display = "block";
+  })();
+
+  async function updatePass(){
+    const p1 = document.getElementById("p1").value;
+    const p2 = document.getElementById("p2").value;
+    if(p1.length < 6) return setState("Password must be at least 6 characters.", "err");
+    if(p1 !== p2) return setState("Passwords do not match.", "err");
+
+    setState("Updating password…");
+
+    const { error } = await supabase.auth.updateUser({ password: p1 });
+    if(error) return setState(error.message, "err");
+
+    setState("Password updated. Redirecting to login…", "ok");
+    await supabase.auth.signOut();
+    setTimeout(()=> window.location.href = "./login.html", 800);
+  }
+</script>
+</body>
+</html>
