@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Dashboard</title>
+</head>
+
+<body>
+
+<h2>Vision2Viral Dashboard</h2>
+
+<input type="file" id="image">
+<button onclick="generate()">Generate</button>
+
+<div id="output"></div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"YOUR_SUPABASE_URL",
+"YOUR_SUPABASE_ANON_KEY"
+)
+
+async function generate(){
+
+let file = document.getElementById("image").files[0]
+if(!file) return alert("Upload image")
+
+let {data:{session}} = await supabase.auth.getSession()
+
+let path = session.user.id + "/" + Date.now() + file.name
+
+await supabase.storage.from("uploads").upload(path,file)
+
+let {data:uploadRow} = await supabase
+.from("uploads")
+.insert({user_id:session.user.id,image_path:path})
+.select().single()
+
+let res = await fetch("/api/generate",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+session.access_token
+},
+body:JSON.stringify({upload_id:uploadRow.id})
+})
+
+let json = await res.json()
+
+document.getElementById("output").innerHTML =
+JSON.stringify(json.output,null,2)
+
+}
+
+</script>
+
+</body>
+</html>
